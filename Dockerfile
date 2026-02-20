@@ -1,22 +1,30 @@
-# Stage 1: Install dependencies
+# Stage 1: install dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json package-lock.json* ./
+RUN npm install
 
-# Stage 2: Rebuild the source code
+# Stage 2: build app
 FROM node:20-alpine AS builder
 WORKDIR /app
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Generate Prisma Client
+RUN npx prisma generate
+
+# Build Next.js app
 RUN npm run build
 
-# Stage 3: Production image
+# Stage 3: production image
 FROM node:20-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV production
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+
+ENV NODE_ENV=production
+
+COPY --from=builder /app ./
+
 EXPOSE 3000
-CMD ["node", "server.js"]
+
+CMD ["npm", "start"]

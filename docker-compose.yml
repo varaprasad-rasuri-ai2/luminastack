@@ -21,7 +21,7 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: postgresql://user:password@db:5432/luminadb
-      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+      MISTRAL_API_KEY: ivkiNpmfC3Av7QTtLtY7GhcDnIsWwPqx
     depends_on:
       - db
 
