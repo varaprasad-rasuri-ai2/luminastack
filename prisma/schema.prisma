@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("postgresql://user:password@db:5432/luminadb")
+  url      = env("DATABASE_URL")
 }
 
 model Chat {
