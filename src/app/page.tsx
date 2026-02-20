@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ChatMessage {
   id: string;
@@ -52,9 +54,6 @@ export default function Home() {
           <h1 className="text-3xl font-semibold text-black dark:text-zinc-50">
             LuminaStack AI Studio
           </h1>
-          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Powered by Mistral AI
-          </p>
         </div>
 
         {/* Chat History */}
@@ -62,11 +61,11 @@ export default function Home() {
           {chatHistory.length === 0 ? (
             <div className="flex items-center justify-center h-full text-center">
               <div>
-                <p className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
-                  Start a conversation
+                <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+                  Instant answers, <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-500">anywhere.</span>
                 </p>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
-                  Ask anything and Mistral AI will respond
+                <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-3">
+                  Zero setup &middot; Works in any app or workflow
                 </p>
               </div>
             </div>
@@ -75,15 +74,22 @@ export default function Home() {
               <div key={chat.id} className="space-y-3">
                 {/* User Message */}
                 <div className="flex justify-end">
-                  <div className="max-w-xs bg-black text-white dark:bg-zinc-600 rounded-lg px-4 py-3 text-sm">
+                  <div className="max-w-[75%] bg-black text-white dark:bg-zinc-600 rounded-lg px-4 py-3 text-sm whitespace-pre-wrap">
                     {chat.prompt}
                   </div>
                 </div>
 
                 {/* AI Response */}
                 <div className="flex justify-start">
-                  <div className="max-w-xs bg-zinc-100 dark:bg-zinc-800 text-black dark:text-zinc-100 rounded-lg px-4 py-3 text-sm">
-                    {chat.response}
+                  <div className="max-w-[85%] bg-zinc-100 dark:bg-zinc-800 rounded-lg px-4 py-3">
+                    <div className="prose prose-sm prose-zinc dark:prose-invert max-w-none
+                      prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5
+                      prose-pre:my-2 prose-pre:bg-zinc-200 dark:prose-pre:bg-zinc-900 prose-pre:rounded-md
+                      prose-code:text-xs prose-code:before:content-none prose-code:after:content-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {chat.response}
+                      </ReactMarkdown>
+                    </div>
                   </div>
                 </div>
 
@@ -107,7 +113,7 @@ export default function Home() {
               placeholder="Ask anything... (Shift+Enter for new line)"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress}
               disabled={loading}
             />
             <button

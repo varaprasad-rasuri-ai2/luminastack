@@ -1,432 +1,263 @@
-# 🚀 LuminaStack AI Studio
+# LuminaStack AI Studio
 
-A production-ready, full-stack AI web application built with **Mistral AI**, **Next.js**, **PostgreSQL**, and **Docker**.
+Scalable AI application starter kit using **Next.js**, **Docker**, **Prisma**, **PostgreSQL**, and **Mistral LLM** integration.
 
-![LuminaStack AI Studio](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-luminastack.vercel.app-blue?style=for-the-badge)](https://luminastack.vercel.app)
+
 ![Next.js](https://img.shields.io/badge/Next.js-16.1.6-black)
 ![React](https://img.shields.io/badge/React-19.2.3-61dafb)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ed)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Overview](#-overview)
-- [Tech Stack](#-tech-stack)
-- [Features](#-features)
-- [Project Structure](#-project-structure)
-- [Prerequisites](#-prerequisites)
-- [Setup Instructions](#-setup-instructions)
-- [Docker Instructions](#-docker-instructions)
-- [API Endpoints](#-api-endpoints)
-- [Environment Variables](#-environment-variables)
-- [Development](#-development)
-- [Future Enhancements](#-future-enhancements)
-- [Contributing](#-contributing)
-
----
-
-## 🎯 Overview
-
-**LuminaStack AI Studio** is a Mistral-powered AI chat application with a modern Next.js frontend and PostgreSQL persistence. It demonstrates:
-
-✅ AI integration (Mistral API)  
-✅ Dockerized Next.js application  
-✅ PostgreSQL database with Prisma ORM  
-✅ RESTful API endpoints  
-✅ Production-ready architecture  
-✅ Docker Compose orchestration  
-
-Perfect for developers learning AI + Docker, startups building AI SaaS MVPs, or as a portfolio project.
+- [Overview](#overview)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Local Development Setup](#local-development-setup)
+- [Production Deployment (Docker)](#production-deployment-docker)
+- [Environment Variables](#environment-variables)
+- [API Endpoints](#api-endpoints)
+- [Database Schema](#database-schema)
+- [Scripts Reference](#scripts-reference)
+- [Troubleshooting](#troubleshooting)
+- [Future Enhancements](#future-enhancements)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## 🧱 Tech Stack
+## Overview
 
-| Layer            | Technology                  |
-| ---------------- | --------------------------- |
-| **Frontend**     | Next.js 16.1.6 (App Router) |
-| **Backend**      | Next.js API Routes          |
-| **AI Model**     | Mistral API                 |
-| **Database**     | PostgreSQL 15               |
-| **ORM**          | Prisma                      |
-| **Styling**      | Tailwind CSS 4               |
-| **Containerization** | Docker & Docker Compose  |
-| **Runtime**      | Node.js 20 (Alpine)         |
-| **Language**     | TypeScript                  |
+**LuminaStack AI Studio** is a full-stack AI chat application where users can ask questions and receive concise, markdown-formatted responses powered by Mistral AI. All conversations are persisted to PostgreSQL.
 
----
+Key highlights:
 
-## ⭐ Features
-
-### 1️⃣ **AI Chat Interface**
-- Real-time text input
-- Send prompts to Mistral AI model
-- Receive AI-generated responses
-- Beautiful, responsive UI
-
-### 2️⃣ **Chat History**
-- Persist all conversations in PostgreSQL
-- Display full chat history with timestamps
-- Organized message display (user vs AI)
-
-### 3️⃣ **Health Monitoring**
-- `/api/health` endpoint for system status
-- Database connectivity checks
-- Docker container health verification
-
-### 4️⃣ **Production-Ready**
-- Multi-stage Docker build for optimized images
-- Environment variable management
-- Error handling and logging
-- Type-safe TypeScript implementation
+- AI-powered chat with Mistral (`mistral-small` model)
+- Markdown rendering for rich AI responses (headings, code blocks, lists, tables)
+- System prompt tuned for concise, direct answers
+- PostgreSQL persistence via Prisma ORM
+- Multi-stage Docker build with Next.js standalone output
+- Auto-migrations on container startup
+- Health check endpoint for monitoring
+- Works in both local development and production Docker without code changes
 
 ---
 
-## 📂 Project Structure
+## Tech Stack
+
+| Layer              | Technology                           |
+| ------------------ | ------------------------------------ |
+| **Frontend**       | Next.js 16.1.6 (App Router), React 19 |
+| **Backend**        | Next.js API Routes                   |
+| **AI**             | Mistral API (v1, `mistral-small`)    |
+| **Database**       | PostgreSQL 15                        |
+| **ORM**            | Prisma 5.7                           |
+| **Styling**        | Tailwind CSS 4, @tailwindcss/typography |
+| **Markdown**       | react-markdown, remark-gfm           |
+| **Containerization** | Docker, Docker Compose             |
+| **Runtime**        | Node.js 20 (Alpine)                  |
+| **Language**       | TypeScript                           |
+
+---
+
+## Architecture
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                   Browser (localhost:3000)                │
+└──────────────────────────┬───────────────────────────────┘
+                           │
+                           ▼
+┌──────────────────────────────────────────────────────────┐
+│                  Next.js App (lumina-app)                 │
+│                                                          │
+│  ┌──────────────┐  ┌───────────────┐  ┌───────────────┐ │
+│  │  App Router   │  │  API Routes   │  │  lib/         │ │
+│  │  page.tsx     │  │  /api/chat    │  │  db.ts        │ │
+│  │  layout.tsx   │  │  /api/health  │  │  mistral.ts   │ │
+│  └──────────────┘  └───────┬───────┘  └───────┬───────┘ │
+└────────────────────────────┼──────────────────┼──────────┘
+                             │                  │
+                ┌────────────┘                  └───────────┐
+                ▼                                           ▼
+     ┌─────────────────────┐                 ┌─────────────────────┐
+     │  PostgreSQL (db)    │                 │  Mistral API        │
+     │  Port 5432          │                 │  (external)         │
+     └─────────────────────┘                 └─────────────────────┘
+```
+
+**Request flow:**
+
+1. User types a message in the chat UI
+2. Frontend sends a POST to `/api/chat`
+3. The API route calls Mistral AI with a system prompt for concise answers
+4. The response is saved to the `Chat` table in PostgreSQL
+5. The saved record (id, prompt, response, timestamp) is returned
+6. The frontend renders the response as formatted markdown
+
+---
+
+## Project Structure
 
 ```
 luminastack/
-│
 ├── src/
 │   ├── app/
 │   │   ├── api/
 │   │   │   ├── chat/
-│   │   │   │   └── route.ts          # Chat API endpoint
+│   │   │   │   └── route.ts           # POST /api/chat — AI chat endpoint
 │   │   │   └── health/
-│   │   │       └── route.ts          # Health check endpoint
-│   │   ├── layout.tsx                # Root layout
-│   │   ├── page.tsx                  # Chat UI page
-│   │   └── globals.css               # Global styles
+│   │   │       └── route.ts           # GET /api/health — DB health check
+│   │   ├── layout.tsx                 # Root layout (fonts, metadata)
+│   │   ├── page.tsx                   # Chat UI with markdown rendering
+│   │   └── globals.css                # Tailwind + typography plugin
 │   └── lib/
-│       ├── db.ts                     # Prisma client instance
-│       └── mistral.ts                   # Mistral API integration
+│       ├── db.ts                      # Prisma client singleton
+│       └── mistral.ts                 # Mistral API wrapper with system prompt
 │
 ├── prisma/
-│   └── schema.prisma                 # Database schema
+│   ├── schema.prisma                  # Database schema (Chat model)
+│   └── migrations/                    # Auto-generated migration files
 │
-├── public/                           # Static assets
+├── public/                            # Static assets
 │
-├── Dockerfile                        # Multi-stage Docker build
-├── docker-compose.yml                # Service orchestration
-├── .env.example                      # Environment variable template
-├── .env                              # Environment variables (local)
-├── package.json                      # Dependencies & scripts
-├── next.config.ts                    # Next.js configuration
-├── tailwind.config.ts                # Tailwind CSS configuration
-├── tsconfig.json                     # TypeScript configuration
-└── README.md                         # This file
+├── Dockerfile                         # Multi-stage build (standalone output)
+├── docker-compose.yml                 # PostgreSQL + App orchestration
+├── start.sh                           # Entrypoint: runs migrations, then starts app
+├── .env.example                       # Environment variable template
+├── .dockerignore                      # Excludes .env, node_modules, .next from image
+├── package.json                       # Dependencies and scripts
+├── next.config.ts                     # Next.js config (standalone output, React Compiler)
+├── tsconfig.json                      # TypeScript config
+└── README.md
 ```
 
 ---
 
-## ✅ Prerequisites
+## Prerequisites
 
-Before running the project, ensure you have:
-
-- **Docker** & **Docker Compose** installed
-  - [Download Docker Desktop](https://www.docker.com/products/docker-desktop)
-- **Node.js** 18+ (for local development)
-- **Mistral API Key**
-  - Sign up at [Mistral AI Console](https://console.mistral.ai/)
+- **Docker** and **Docker Compose** — [Download Docker Desktop](https://www.docker.com/products/docker-desktop)
+- **Node.js 20+** — for local development only
+- **Mistral API Key** — sign up at [console.mistral.ai](https://console.mistral.ai/)
 
 ---
 
-## 🚀 Setup Instructions
+## Local Development Setup
 
-### Step 1: Clone the Repository
+### 1. Clone and install
 
 ```bash
 git clone https://github.com/your-username/luminastack.git
 cd luminastack
+npm install
 ```
 
-### Step 2: Create Environment File
+### 2. Set up environment
 
 ```bash
 cp .env.example .env
 ```
 
-Update `.env` with your credentials:
+Edit `.env` and add your Mistral API key. For local dev, use `127.0.0.1` as the DB host:
 
 ```env
-DATABASE_URL=postgresql://user:password@db:5432/luminadb
-MISTRAL_API_KEY=your_actual_mistral_api_key
+POSTGRES_USER=anonymous
+POSTGRES_PASSWORD=Conference!1
+POSTGRES_DB=luminadb
+DATABASE_URL=postgresql://anonymous:Conference!1@127.0.0.1:5432/luminadb
+MISTRAL_API_KEY=your_actual_key_here
 ```
 
-### Step 3: Local Development (Without Docker)
+### 3. Start PostgreSQL
 
 ```bash
-# Install dependencies
-npm install
+docker compose up db -d
+```
 
-# Generate Prisma client
-npm run prisma:generate
+### 4. Run database migrations
 
-# Run the development server
+```bash
+npx prisma migrate dev
+```
+
+### 5. Start the dev server
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) — the app hot-reloads on file changes.
 
 ---
 
-## 🐳 Docker Instructions
+## Production Deployment (Docker)
 
-### Quick Start with Docker Compose
+### Quick start
 
-Run the entire stack with one command:
+Create a `.env` file with your production credentials:
+
+```env
+POSTGRES_USER=anonymous
+POSTGRES_PASSWORD=your_strong_password
+POSTGRES_DB=luminadb
+MISTRAL_API_KEY=your_mistral_api_key
+```
+
+Then run:
 
 ```bash
-docker-compose up --build
+docker compose up --build -d
 ```
 
 This will:
-1. Build the Next.js application image
-2. Start PostgreSQL database container
-3. Run the web application on port 3000
-4. Create persistent database volume
 
-### Access the Application
+1. Build the Next.js app as a standalone production image
+2. Start PostgreSQL with a health check
+3. Wait until PostgreSQL is healthy before starting the app
+4. Automatically run `prisma migrate deploy` to create/update tables
+5. Start the Node.js production server on port 3000
 
-```
-http://localhost:3000
-```
+### How it works under the hood
 
-### View Database (Optional - pgAdmin)
+- **Dockerfile** uses a 3-stage build: install deps → build app → minimal production image
+- **`output: "standalone"`** in `next.config.ts` produces a self-contained server (~50MB vs full node_modules)
+- **`start.sh`** runs migrations then starts `node server.js`
+- The app container **waits for the DB health check** before booting (`depends_on: condition: service_healthy`)
+- Both services have `restart: always` for automatic recovery
+- Secrets are read from environment variables, never baked into the image (`.env` is in `.dockerignore`)
 
-To inspect the database, you can use pgAdmin or any PostgreSQL client:
-
-```
-Host: localhost
-Port: 5432
-Username: user
-Password: password
-Database: luminadb
-```
-
-### Useful Docker Commands
+### Useful commands
 
 ```bash
-# Build images
-docker-compose build
-
-# Start in background
-docker-compose up -d
+# Start everything
+docker compose up --build -d
 
 # View logs
-docker-compose logs -f
+docker compose logs -f
 
-# Stop services
-docker-compose down
+# View app logs only
+docker compose logs -f app
 
-# Remove volumes (careful!)
-docker-compose down -v
+# Stop everything
+docker compose down
 
-# Rebuild specific service
-docker-compose build web
-docker-compose up web
+# Stop and delete database volume (reset data)
+docker compose down -v
+
+# Rebuild only the app
+docker compose build app && docker compose up -d app
 ```
 
----
+### Reverse proxy (optional)
 
-## 🔌 API Endpoints
-
-### POST `/api/chat`
-
-Send a message to Mistral AI and save to database.
-
-**Request:**
-```json
-{
-  "message": "Explain Docker in simple terms"
-}
-```
-
-**Response:**
-```json
-{
-  "id": "uuid-string",
-  "prompt": "Explain Docker in simple terms",
-  "response": "Docker is a containerization platform...",
-  "createdAt": "2026-02-20T10:30:45.123Z"
-}
-```
-
-**Status Codes:**
-- `200` - Success
-- `400` - Missing message field
-- `500` - Server error
-
----
-
-### GET `/api/health`
-
-Check application and database health status.
-
-**Response (Healthy):**
-```json
-{
-  "status": "ok",
-  "database": "connected"
-}
-```
-
-**Response (Error):**
-```json
-{
-  "status": "error",
-  "database": "disconnected"
-}
-```
-
-**Status Codes:**
-- `200` - All systems operational
-- `503` - Database connection failed
-
----
-
-## 🔐 Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-# Database Configuration
-DATABASE_URL=postgresql://user:password@db:5432/luminadb
-
-# Mistral AI API Key
-MISTRAL_API_KEY=your_mistral_api_key_here
-
-# Next.js Environment
-NODE_ENV=development
-```
-
-**Using `.env.example`:**
-
-A template file `.env.example` is included. Copy it and fill in your actual values:
-
-```bash
-cp .env.example .env
-```
-
-**⚠️ Security Notes:**
-- Never commit `.env` to version control
-- `.env.local` is already in `.gitignore`
-- Keep API keys private
-- Use different keys for dev and production
-
----
-
-## 🛠️ Development
-
-### Install Dependencies
-
-```bash
-npm install
-```
-
-### Run Development Server
-
-```bash
-npm run dev
-```
-
-Server starts at `http://localhost:3000` with hot reload.
-
-### Generate Prisma Client
-
-```bash
-npm run prisma:generate
-```
-
-### Run Database Migrations
-
-```bash
-npm run prisma:migrate
-```
-
-### Build for Production
-
-```bash
-npm run build
-npm start
-```
-
-### Linting
-
-```bash
-npm run lint
-```
-
----
-
-## 📄 Database Schema
-
-The Chat model stores all conversations:
-
-```prisma
-model Chat {
-  id        String   @id @default(uuid())
-  prompt    String
-  response  String
-  createdAt DateTime @default(now())
-}
-```
-
-**Fields:**
-- `id` - Unique identifier (UUID)
-- `prompt` - User's message
-- `response` - AI-generated response
-- `createdAt` - Timestamp of creation
-
----
-
-## 🧪 Testing the Application
-
-### Test Chat Endpoint
-
-```bash
-curl -X POST http://localhost:3000/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "What is Docker?"}'
-```
-
-### Test Health Endpoint
-
-```bash
-curl http://localhost:3000/api/health
-```
-
-### Through UI
-
-1. Open [http://localhost:3000](http://localhost:3000)
-2. Type a message in the textarea
-3. Click "Send" or press Ctrl+Enter
-4. View the AI response and chat history
-
----
-
-## 🚢 Deployment
-
-### Deploy to Production
-
-1. **Set Production Environment Variables:**
-
-```bash
-# On your production server
-export DATABASE_URL=postgresql://...
-export MISTRAL_API_KEY=...
-export NODE_ENV=production
-```
-
-2. **Use Docker Compose:**
-
-```bash
-docker-compose -f docker-compose.yml up -d
-```
-
-3. **Setup Reverse Proxy (Nginx/Apache)**
+For a custom domain, put Nginx in front:
 
 ```nginx
 server {
@@ -446,120 +277,192 @@ server {
 
 ---
 
-## 🔮 Future Enhancements
+## Environment Variables
 
-- [ ] User authentication (JWT-based)
-- [ ] WebSocket support for real-time chat
-- [ ] Streaming AI responses
+| Variable            | Description                        | Example                                              |
+| ------------------- | ---------------------------------- | ---------------------------------------------------- |
+| `POSTGRES_USER`     | PostgreSQL username                | `anonymous`                                          |
+| `POSTGRES_PASSWORD` | PostgreSQL password                | `Conference!1`                                       |
+| `POSTGRES_DB`       | PostgreSQL database name           | `luminadb`                                           |
+| `DATABASE_URL`      | Full Prisma connection string      | `postgresql://anonymous:Conference!1@127.0.0.1:5432/luminadb` |
+| `MISTRAL_API_KEY`   | API key from Mistral AI console    | `your_key_here`                                      |
+
+**Important notes:**
+
+- For **local dev**, `DATABASE_URL` should use `127.0.0.1` as the host
+- For **Docker production**, `DATABASE_URL` is auto-constructed in `docker-compose.yml` using `db` as the host (Docker internal network)
+- Never commit `.env` to version control — it's already in `.dockerignore` and should be in `.gitignore`
+
+---
+
+## API Endpoints
+
+### POST `/api/chat`
+
+Send a message and receive an AI response.
+
+**Request:**
+
+```bash
+curl -X POST http://localhost:3000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is Docker?"}'
+```
+
+**Response (200):**
+
+```json
+{
+  "id": "a8a9d39f-26ab-457b-aed8-d4122ffc3d35",
+  "prompt": "What is Docker?",
+  "response": "Docker is a platform for building, shipping, and running applications in containers...",
+  "createdAt": "2026-02-20T13:40:21.752Z"
+}
+```
+
+**Error responses:**
+
+| Status | Body                              | Reason               |
+| ------ | --------------------------------- | -------------------- |
+| 400    | `{"error": "Message is required"}` | Missing `message` field |
+| 500    | `{"error": "Server error"}`       | DB or internal failure |
+
+---
+
+### GET `/api/health`
+
+Check application and database connectivity.
+
+**Response (200):**
+
+```json
+{
+  "status": "ok",
+  "database": "connected"
+}
+```
+
+**Response (503):**
+
+```json
+{
+  "status": "error",
+  "database": "disconnected"
+}
+```
+
+---
+
+## Database Schema
+
+Single `Chat` model in `prisma/schema.prisma`:
+
+```prisma
+model Chat {
+  id        String   @id @default(uuid())
+  prompt    String
+  response  String
+  createdAt DateTime @default(now())
+}
+```
+
+| Field       | Type     | Description              |
+| ----------- | -------- | ------------------------ |
+| `id`        | UUID     | Auto-generated unique ID |
+| `prompt`    | String   | User's message           |
+| `response`  | String   | AI-generated response    |
+| `createdAt` | DateTime | Timestamp of creation    |
+
+---
+
+## Scripts Reference
+
+| Script               | Command                          | Purpose                              |
+| -------------------- | -------------------------------- | ------------------------------------ |
+| `npm run dev`        | `next dev`                       | Start dev server with hot reload     |
+| `npm run build`      | `prisma generate && next build`  | Generate Prisma client and build app |
+| `npm start`          | `next start`                     | Run production build                 |
+| `npm run lint`       | `eslint`                         | Lint the codebase                    |
+| `npm run prisma:generate` | `prisma generate`           | Regenerate Prisma client             |
+| `npm run prisma:migrate`  | `prisma migrate dev`        | Create and apply migrations (dev)    |
+
+---
+
+## Troubleshooting
+
+### "Server error" on POST /api/chat
+
+- Check if PostgreSQL is running: `docker compose ps`
+- Verify `DATABASE_URL` in `.env` uses `127.0.0.1` (not `localhost` or `db`) for local dev
+- Run migrations: `npx prisma migrate dev`
+
+### "Can't reach database server"
+
+- Ensure the DB container is running: `docker compose up db -d`
+- Wait a few seconds for PostgreSQL to initialize
+- Confirm port 5432 is not in use by another process
+
+### Mistral API errors
+
+- Verify `MISTRAL_API_KEY` is set and valid
+- The app uses the `v1` endpoint: `https://api.mistral.ai/v1/chat/completions`
+- Check your API quota at [console.mistral.ai](https://console.mistral.ai/)
+
+### "Port 3000 is in use"
+
+- Kill the existing process or use a different port:
+  ```bash
+  npx next dev -p 3001
+  ```
+
+### Lock file error ("is another instance of next dev running?")
+
+- Stop all Node processes and remove the lock:
+  ```bash
+  # Windows
+  Remove-Item .next\dev\lock -Force
+
+  # macOS/Linux
+  rm -f .next/dev/lock
+  ```
+
+### Prisma generate fails with EPERM on Windows
+
+- This happens when Cursor's TypeScript server locks the Prisma engine DLL
+- Close the IDE, run `npx prisma generate`, then reopen
+- This does not affect the app if the client was previously generated
+
+---
+
+## Future Enhancements
+
+- [ ] Streaming AI responses (SSE)
+- [ ] User authentication (JWT)
+- [ ] Chat session management (multiple conversations)
 - [ ] File upload and processing
-- [ ] Vector database (Pinecone) for semantic search
-- [ ] Voice-to-text integration
-- [ ] Multi-language support
-- [ ] Analytics dashboard
-- [ ] Rate limiting and quotas
-- [ ] Admin panel for moderation
+- [ ] Rate limiting and API quotas
+- [ ] Admin dashboard
+- [ ] Multi-model support (OpenAI, Claude, etc.)
+- [ ] Voice-to-text input
+- [ ] Export chat history
 
 ---
 
-## 🐛 Troubleshooting
-
-### Docker Container Won't Start
-
-```bash
-# Check logs
-docker-compose logs web
-
-# Verify environment variables
-docker-compose config
-```
-
-### Database Connection Error
-
-```bash
-# Ensure DB is running
-docker-compose ps
-
-# Check DATABASE_URL format
-# Should be: postgresql://user:password@db:5432/luminadb
-```
-
-### Mistral API Errors
-
-- Verify `MISTRAL_API_KEY` is correct
-- Check Mistral API quota and billing
-- Ensure network connectivity
-
-### Port Already in Use
-
-```bash
-# Change port in docker-compose.yml
-ports:
-  - "3001:3000"  # Use 3001 instead of 3000
-```
-
----
-
-## 📚 Resources
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Prisma Documentation](https://www.prisma.io/docs)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs)
-- [Docker Documentation](https://docs.docker.com)
-- [Mistral API Documentation](https://docs.mistral.ai/)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
+## Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes: `git commit -m 'Add my feature'`
+4. Push to the branch: `git push origin feature/my-feature`
 5. Open a Pull Request
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-## 👤 Author
-
-Built by a Fullstack Developer transitioning to Architect 🚀
-
-A demonstration of:
-- AI integration
-- Fullstack architecture
-- Containerization best practices
-- Production-ready code structure
+This project is licensed under the MIT License.
 
 ---
 
-## 📞 Support
-
-For questions or issues:
-
-1. Check existing [GitHub Issues](https://github.com/your-username/luminastack/issues)
-2. Review troubleshooting section above
-3. Create a new issue with detailed description
-
----
-
-## 🎉 Acknowledgments
-
-- Mistral AI for their powerful AI models
-- Vercel for Next.js
-- Prisma for ORM
-- Docker for containerization
-- The open-source community
-
----
-
-**Last Updated:** February 20, 2026  
-**Version:** 1.0.0  
-**Status:** ✅ Production Ready
+**Version:** 0.1.0
+**Last Updated:** February 20, 2026
